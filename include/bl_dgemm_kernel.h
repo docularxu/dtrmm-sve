@@ -91,6 +91,15 @@ void bl_dgemm_ukr( int k,
         unsigned long long ldc,
         aux_t* data );
 
+void bl_dtrmm_ukr( int k,
+        double *a,
+        double *b,
+        double *c,
+        unsigned long long ldc,
+        aux_t* data,
+        int    xa,
+        int    ya );
+
 void bl_dgemm_int_8x4( int k,
         double *a,
         double *b,
@@ -149,6 +158,18 @@ static void (*bl_micro_kernel) (
         //bl_dgemm_asm_12x4
 };
 
+static void (*bl_trmm_micro_kernel) (
+        int    k,
+        double *a,
+        double *b,
+        double *c,
+        unsigned long long ldc,
+        aux_t  *aux,
+        int    xa,
+        int    ya
+        ) = {
+        BL_TRMM_MICRO_KERNEL
+};
 
 
 // End extern "C" construct block.

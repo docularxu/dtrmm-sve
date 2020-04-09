@@ -80,6 +80,7 @@ extern "C" {
 //#define BL_MICRO_KERNEL bl_dgemm_asm_6x8
 //#define BL_MICRO_KERNEL bl_dgemm_asm_12x4
 #define BL_MICRO_KERNEL bl_dgemm_ukr
+#define BL_TRMM_MICRO_KERNEL bl_dtrmm_ukr
 
 // End extern "C" construct block.
 #ifdef __cplusplus

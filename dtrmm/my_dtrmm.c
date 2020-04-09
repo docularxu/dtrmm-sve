@@ -220,7 +220,9 @@ void bl_macro_kernel(
             // printf("micro kernel for A: (%d, %d), height=%d, width=%d\n",
             //       xa + i, ya, aux.m, k);
             // printf("             packB: column=%d, width=%d\n", j, aux.n);
-            if ( xa + i + aux.m - 1 < ya ) {
+
+            // Note: skip at the same mr*kc sub-A where it's also skipped in Loop 3.
+            if ( xa + i + aux.m - 1 < ya ) {     
                  // printf("all ZEROs, skip\n");
                  continue;
             }
@@ -228,13 +230,15 @@ void bl_macro_kernel(
                 aux.b_next += DGEMM_NR * k;
             }
 
-            ( *bl_micro_kernel ) (      // TODO: inside 256 column, there is all zero sub-packA. if they are zero, should be skipped.
+            ( *bl_trmm_micro_kernel ) (
                     k,
                     &packA[ i * k ],
                     &packB[ j * k ],
                     &C[ j * ldc + i ],
                     (unsigned long long) ldc,
-                    &aux
+                    &aux,
+                    xa + i,
+                    ya
                     );
         }                                                        // 1-th loop around micro-kernel
     }                                                            // 2-th loop around micro-kernel
@@ -321,6 +325,7 @@ void bl_dtrmm(
                     // if 'left-bottom' is in upper triangular, then it's all zeros, no need to pack.
                     if ( ic + i + wb - 1 < pc ) {
                         // printf("all zeros, skip\n"); 
+                        #if 0
                         packA_zeros_mcxkc_d(
                                 wb,
                                 pb,
@@ -329,6 +334,8 @@ void bl_dtrmm(
                                 ic + i,
                                 &packA[ 0 * DGEMM_MC * pb + i * pb ]
                                 );
+                        #endif
+                        continue;
                     }
                     // else if 'top-right' is in lower triangular or diagonal, then it should be packed the same way as gemm.
                     else if ( ic + i >= pc + pb - 1 ) {

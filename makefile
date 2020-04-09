@@ -16,7 +16,7 @@ FRAME_CPP_SRC= \
 
 KERNEL_SRC=    \
 							 kernels/bl_dgemm_asm_8x4.c \
-							 kernels/bl_dgemm_ukr.c \
+							 kernels/bl_dtrmm_ukr.c \
 
 OTHER_DEP = \
 			                 include/bl_dtrmm.h \
