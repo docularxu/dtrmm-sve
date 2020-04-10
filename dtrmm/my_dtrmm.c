@@ -278,6 +278,11 @@ void bl_dtrmm(
     for ( jc = 0; jc < n; jc += DGEMM_NC ) {                                       // 5-th loop around micro-kernel
         jb = min( n - jc, DGEMM_NC );
 
+        // TODO: packing all k rows of XB in one loop destroys packB's preload in
+        //       cache hierarchy of memory system.
+        //  Reason I chnage this is because unlike GEMM, TRMM stores the results 
+        //    back into XB. So, this part of XB has to be moved then erased to zero.
+        //
         // pack jb column of XB
         packB = packB_NC;
         for ( pc = 0; pc < k; pc += DGEMM_KC ) {                                   // pack B, kc row each step
@@ -297,9 +302,7 @@ void bl_dtrmm(
             packB += pb * ( DGEMM_NC + 1 );
         }
         // zero k*jb of XB
-        #if 1
         zero_matrix( k, jb, XB + jc * ldb, ldb );
-        #endif
 
         packB = packB_NC;
         for ( pc = 0; pc < k; pc += DGEMM_KC ) {                                   // 4-th loop around micro-kernel
@@ -308,6 +311,7 @@ void bl_dtrmm(
             for ( ic = 0; ic < m; ic += DGEMM_MC ) {                               // 3-rd loop around micro-kernel
                 // printf("in loop 3.\n");
                 ib = min( m - ic, DGEMM_MC );
+
 
                 for ( i = 0; i < ib; i += DGEMM_MR ) {                             // Loop 3.1, to packA 
                     wb = min( ib - i, DGEMM_MR );
