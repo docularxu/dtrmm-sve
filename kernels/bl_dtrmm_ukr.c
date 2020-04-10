@@ -20,7 +20,18 @@ void bl_dtrmm_ukr( int    k,
 {
     int l, j, i;
     register double a_il_reg;
+    register double b_lj0_reg, b_lj1_reg, b_lj2_reg, b_lj3_reg;
     register double c_ij0_reg, c_ij1_reg, c_ij2_reg, c_ij3_reg;
+    double *b0_pntr, *b1_pntr, *b2_pntr, *b3_pntr;
+    double *a_pntr;
+    double *c_pntr;   // TODO: c_pntr can be serialized too.
+
+    a_pntr = a;
+
+    b0_pntr = b;
+    b1_pntr = b + 1;
+    b2_pntr = b + 2;
+    b3_pntr = b + 3;
 
     for ( l = 0; l < k; ++l )                               // Loop 0.1, column [l] of A, times, row [l] of B
     {                 
@@ -33,27 +44,39 @@ void bl_dtrmm_ukr( int    k,
 
         for ( j = 0; j < DGEMM_NR; j+=4 )                    // Loop 0.2, walk through row[l] of B
         { 
+            b_lj0_reg = *b0_pntr;
+            b_lj1_reg = *b1_pntr;
+            b_lj2_reg = *b2_pntr;
+            b_lj3_reg = *b3_pntr;
+
             for ( i = 0; i < DGEMM_MR; ++i )                // Loop 0.3, walk through column[l] of A
             {
-                a_il_reg = a( i, l );
+                a_il_reg = *a_pntr ++;
 
                 c_ij0_reg = (double) 0.0;
                 c_ij1_reg = (double) 0.0;
                 c_ij2_reg = (double) 0.0;
                 c_ij3_reg = (double) 0.0;
 
-                c_ij0_reg += a_il_reg * b( l, j + 0 );
-                c_ij1_reg += a_il_reg * b( l, j + 1 );
-                c_ij2_reg += a_il_reg * b( l, j + 2 );
-                c_ij3_reg += a_il_reg * b( l, j + 3 );
+                // TODO: b(l, j+0:3) can be loaded into a length-4 vector using one instruction
+                //       but for now, let's read them from b_pntr.
+                c_ij0_reg += a_il_reg * b_lj0_reg;  // b( l, j + 0 );
+                c_ij1_reg += a_il_reg * b_lj1_reg;  // b( l, j + 1 );
+                c_ij2_reg += a_il_reg * b_lj2_reg;  // b( l, j + 2 );
+                c_ij3_reg += a_il_reg * b_lj3_reg;  // b( l, j + 3 );
 
                 // memory store
                 c( i, j + 0 ) += c_ij0_reg;
                 c( i, j + 1 ) += c_ij1_reg;
                 c( i, j + 2 ) += c_ij2_reg;
                 c( i, j + 3 ) += c_ij3_reg;
-            }
-        }
-    }
+            }  // end of i
+
+            b0_pntr += DGEMM_NR;
+            b1_pntr += DGEMM_NR;
+            b2_pntr += DGEMM_NR;
+            b3_pntr += DGEMM_NR;
+        }  // end of j
+    }  // end of l
 
 }
