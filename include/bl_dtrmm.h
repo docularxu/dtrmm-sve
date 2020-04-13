@@ -55,8 +55,6 @@ extern "C" {
 #endif
 
 #include <math.h>
-#include <immintrin.h>
-
 
 #include <stdio.h>
 #include <stdlib.h>
