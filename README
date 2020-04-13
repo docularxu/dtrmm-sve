@@ -21,3 +21,5 @@ $ make
 $ cd test
 $ ./run_bl_dtrmm.sh
 
+On SVE not-enabled machines, please use with emulator, such as armie:
+$ armie -msve-vector-bits=256 -i libinscount_emulated.so -- ./test_bl_dtrmm.x 1000 1000
