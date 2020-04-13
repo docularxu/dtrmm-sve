@@ -130,6 +130,8 @@ static inline void packA_diag_mcxkc_d(
 
     for ( p = 0, py = offseta_y; p < k; p ++, py ++ ) {
         for ( i = 0, px = offseta; i < DGEMM_MR; i ++, px ++ ) {
+            // TODO: make these loops in reverse order,
+            //      so, when at diagonal, we can 'break', instead of 'contrinue'.
             if ( px < py )     // 0 for upper triangular
                 *packA = (double) 0.0;
             else
