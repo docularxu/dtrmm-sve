@@ -79,7 +79,7 @@ void computeError(
         for ( j = 0; j < n; j ++ ) {
             if ( fabs( C( i, j ) - C_ref( i, j ) ) > TOLERANCE ) {
                 printf( "C[ %d ][ %d ] != C_ref, %E, %E\n", i, j, C( i, j ), C_ref( i, j ) );
-                // break;
+                break;
             }
         }
     }
@@ -106,9 +106,9 @@ void test_bl_dtrmm(
 
     A    = (double*)malloc( sizeof(double) * lda * k );
     // TODO: because of bl_micro_kernel() write beyond B's normal m*n, I have to increase ldb and column as well.
-    B    = (double*)malloc( sizeof(double) * ldb * ( n + 4) );     // 4 refer to DGEMM_NR is 4
-    B_MY    = (double*)malloc( sizeof(double) * ldb * ( n + 4) );
-    B_REF   = (double*)malloc( sizeof(double) * ldb * ( n + 4) );
+    B    = (double*)malloc( sizeof(double) * ldb * ( n + 8) );     // 4 refer to DGEMM_NR is 4
+    B_MY    = (double*)malloc( sizeof(double) * ldb * ( n + 8) );
+    B_REF   = (double*)malloc( sizeof(double) * ldb * ( n + 8) );
 
     if( A == NULL || B == NULL || B_MY == NULL || B_REF == NULL ) {
         printf("Allocation of memory failed. Abort.\n");
@@ -121,12 +121,14 @@ void test_bl_dtrmm(
     // Randonly generate points in [ 0, 1 ].
     for ( p = 0; p < k; p ++ ) {
         for ( i = 0; i < lda; i ++ ) {
-            A( i, p ) = (double)( drand48() );
+            A( i, p ) = (double)( 1.0 );
+            // A( i, p ) = (double)( drand48() );
         }
     }
     for ( j = 0; j < n; j ++ ) {
         for ( p = 0; p < ldb; p ++ ) {
-            B( p, j ) = (double)( drand48() );
+            B( p, j ) = (double)( 1.0 );
+            // B( p, j ) = (double)( drand48() );
         }
     }
 

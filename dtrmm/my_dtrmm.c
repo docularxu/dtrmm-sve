@@ -208,6 +208,7 @@ void bl_macro_kernel(
 {
     int    i, j;
     aux_t  aux;
+    int    offset;
 
     aux.b_next = packB;
 
@@ -232,16 +233,18 @@ void bl_macro_kernel(
                 aux.b_next += DGEMM_NR * k;
             }
 
-            bl_dtrmm_asm_sve_8x8(
+            offset = ( xa + i - ya + aux.m - 1 );    /* a's first column's last elements distance to diagnol */
+            #if 1
+	    bl_dtrmm_asm_sve_8x8(
                     k,
                     &packA[ i * k ],
                     &packB[ j * k ],
                     &C[ j * ldc + i ],
                     (unsigned long long) ldc,
                     &aux,
-                    xa + i,
-                    ya
+                    offset
                     );
+            #else
             ( *bl_trmm_micro_kernel ) (
                     k,
                     &packA[ i * k ],
@@ -249,9 +252,9 @@ void bl_macro_kernel(
                     &C[ j * ldc + i ],
                     (unsigned long long) ldc,
                     &aux,
-                    xa + i,
-                    ya
+                    offset
                     );
+            #endif
         }                                                        // 1-th loop around micro-kernel
     }                                                            // 2-th loop around micro-kernel
 }

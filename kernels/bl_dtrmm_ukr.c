@@ -15,8 +15,7 @@ void bl_dtrmm_ukr( int    k,
                    double *c,
                    unsigned long long ldc,
                    aux_t* data,
-                   int    xa,
-                   int    ya )
+                   int    offset )
 {
     int l, j, i;
     register double a_il_reg;
@@ -26,8 +25,6 @@ void bl_dtrmm_ukr( int    k,
     double *a_pntr;
     double *c_pntr;   // TODO: c_pntr can be serialized too.
 
-    a_pntr = a;
-
     b0_pntr = b;
 
     for ( l = 0; l < k; ++l )                               // Loop 0.1, column [l] of A, times, row [l] of B
@@ -36,7 +33,7 @@ void bl_dtrmm_ukr( int    k,
         // also, all columns following column[l], are all-zeros too.
         //
         // lowest element of column[l] of A is: (xa+aux.m-1, ya+l)
-        if ( xa + data->m - 1 < ya + l )
+        if ( offset < l )
             break;
 
         for ( j = 0; j < DGEMM_NR; j+=4 )                    // Loop 0.2, walk through row[l] of B
@@ -45,6 +42,8 @@ void bl_dtrmm_ukr( int    k,
             b_lj1_reg = *b0_pntr ++ ;
             b_lj2_reg = *b0_pntr ++ ;
             b_lj3_reg = *b0_pntr ++ ;
+
+            a_pntr = a + DGEMM_MR * l;
 
             for ( i = 0; i < DGEMM_MR; ++i )                // Loop 0.3, walk through column[l] of A
             {

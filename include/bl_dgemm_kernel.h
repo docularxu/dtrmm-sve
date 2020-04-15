@@ -85,8 +85,7 @@ void bl_dtrmm_ukr( int k,
         double *c,
         unsigned long long ldc,
         aux_t* data,
-        int    xa,
-        int    ya );
+        int    offset );
 
 void bl_dtrmm_asm_sve_8x8( int k,
         double *a,
@@ -94,8 +93,7 @@ void bl_dtrmm_asm_sve_8x8( int k,
         double *c,
         unsigned long long ldc,
         aux_t* data,
-        int    xa,
-        int    ya );
+        int    offset );
 
 void bl_dgemm_int_8x4( int k,
         double *a,
@@ -162,8 +160,7 @@ static void (*bl_trmm_micro_kernel) (
         double *c,
         unsigned long long ldc,
         aux_t  *aux,
-        int    xa,
-        int    ya
+        int    offset
         ) = {
         BL_TRMM_MICRO_KERNEL
 };
