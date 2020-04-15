@@ -88,6 +88,15 @@ void bl_dtrmm_ukr( int k,
         int    xa,
         int    ya );
 
+void bl_dtrmm_asm_sve_8x8( int k,
+        double *a,
+        double *b,
+        double *c,
+        unsigned long long ldc,
+        aux_t* data,
+        int    xa,
+        int    ya );
+
 void bl_dgemm_int_8x4( int k,
         double *a,
         double *b,

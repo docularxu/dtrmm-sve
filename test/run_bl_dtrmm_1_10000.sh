@@ -14,7 +14,7 @@ echo "result=["
 echo -e "%m\t%n\t%k\t%MY_GFLOPS\t%REF_GFLOPS"
 for (( k=k_start; k<=k_end; k+=k/100+1 ))
 do
-    ./test_bl_dtrmm.x     $k $k
+    armie -msve-vector-bits=256 -i libinscount_emulated.so -- ./test_bl_dtrmm.x     $k $k
 done
 echo "];"
 

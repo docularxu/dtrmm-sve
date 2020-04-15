@@ -17,11 +17,14 @@ FRAME_CPP_SRC= \
 KERNEL_SRC=    \
 							 kernels/bl_dtrmm_ukr.c \
 
+KERNEL_SRC_S=    \
+							 kernels/bl_dtrmm_asm_sve_8x8.S \
+
 OTHER_DEP = \
 			                 include/bl_dtrmm.h \
 			                 include/bl_dgemm_kernel.h \
 
-BLISLAB_OBJ=$(FRAME_CC_SRC:.c=.o) $(FRAME_CPP_SRC:.cpp=.o) $(KERNEL_SRC:.c=.o) $(FRAME_CC_SRC_S:.c=.os) $(KERNEL_SRC_S:.c=.os)
+BLISLAB_OBJ=$(FRAME_CC_SRC:.c=.o) $(FRAME_CPP_SRC:.cpp=.o) $(KERNEL_SRC:.c=.o) $(FRAME_CC_SRC_S:.c=.os) $(KERNEL_SRC_S:.S=.os)
 
 all: $(LIBBLISLAB) $(SHAREDLIBBLISLAB) TESTBLISLAB
 
@@ -39,6 +42,9 @@ $(SHAREDLIBBLISLAB): $(BLISLAB_OBJ)
 # Object files compiling rules
 # ---------------------------------------------------------------------------
 %.o: %.c $(OTHER_DEP)
+	$(CC) $(CFLAGS) -c $< -o $@ $(LDFLAGS)
+
+%.os: %.S $(OTHER_DEP)
 	$(CC) $(CFLAGS) -c $< -o $@ $(LDFLAGS)
 
 %.o: %.cpp

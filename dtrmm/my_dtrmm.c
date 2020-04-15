@@ -232,6 +232,16 @@ void bl_macro_kernel(
                 aux.b_next += DGEMM_NR * k;
             }
 
+            bl_dtrmm_asm_sve_8x8(
+                    k,
+                    &packA[ i * k ],
+                    &packB[ j * k ],
+                    &C[ j * ldc + i ],
+                    (unsigned long long) ldc,
+                    &aux,
+                    xa + i,
+                    ya
+                    );
             ( *bl_trmm_micro_kernel ) (
                     k,
                     &packA[ i * k ],
