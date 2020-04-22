@@ -1,3 +1,5 @@
+This is an implementation of DTRMM using Arm SVE 256 bits assembly.
+
 This is a project based on BLISLab's GEMM reference code. Intention of this fork is
 to implement DTRMM using Arm's SVE intrinsics.
 
@@ -16,10 +18,23 @@ How to compile and execute the code:
 1. Change the options in sourceme.sh and set the environment variables.
 $ source sourceme.sh
 2. Compile the code, generate the library and test executables.
+$ make clean
 $ make
 3. Execute the test driver.
 $ cd test
-$ ./run_bl_dtrmm.sh
+$ ./run_bl_dtrmm_1_10000.sh
 
 On SVE not-enabled machines, please use with emulator, such as armie:
 $ armie -msve-vector-bits=256 -i libinscount_emulated.so -- ./test_bl_dtrmm.x 1000 1000
+
+Another way is to use SVE enabled QEMU user application, such as:
+$ [qemu.git]/aarch64-linux-user/qemu-aarch64 -cpu max,sve256=on test/test_bl_dtrmm.x 3 3
+
+To build a QEMU-user locally, please follow these steps:
+$ git clone https://git.qemu.org/git/qemu.git qemu.git
+$ cd qemu.git
+$ ./configure --target-list=aarch64-linux-user --static
+$ make -j8
+$ ./aarch64-linux-user/qemu-aarch64 --version
+qemu-aarch64 version 4.2.92 (v5.0.0-rc2-9-g17e1e49814-dirty)
+
