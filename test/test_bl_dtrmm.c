@@ -46,7 +46,7 @@
 
 #include "bl_dtrmm.h"
 
-#define TOLERANCE 1E-10
+#define TOLERANCE 1E-11
 // copy from A to AT
 void copy_matrix(
         int    m,
@@ -121,14 +121,14 @@ void test_bl_dtrmm(
     // Randonly generate points in [ 0, 1 ].
     for ( p = 0; p < k; p ++ ) {
         for ( i = 0; i < lda; i ++ ) {
-            A( i, p ) = (double)( 1.0 );
-            // A( i, p ) = (double)( drand48() );
+            // A( i, p ) = (double)( 1.0 );
+            A( i, p ) = (double)( drand48() );
         }
     }
     for ( j = 0; j < n; j ++ ) {
         for ( p = 0; p < ldb; p ++ ) {
-            B( p, j ) = (double)( 1.0 );
-            // B( p, j ) = (double)( drand48() );
+            // B( p, j ) = (double)( 1.0 );
+            B( p, j ) = (double)( drand48() );
         }
     }
 
