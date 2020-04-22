@@ -160,72 +160,50 @@ FUNC:
     ldr     z14, [a_pntr]
     ldr     z15, [a_pntr, #1, MUL VL]
     add     a_pntr, a_pntr, #64
-    /* load b ( l,0:3 ) into 1st double of z0, z1, z2, z3 respectively */
 
-/* TODO: for b  matrix, we can */
-/*        use  LD1RQD, FMLA indexed which has no predicate. */
-/* TODO: to replace ld4 and dup, fmla. */
-
-    ld4     { v0.d, v1.d, v2.d, v3.d }[0], [b_pntr]
-    add     b_pntr, b_pntr, #32
-    /* load b ( l,4:7 ) into 1st double of z4, z5, z6 and z7 respectively */
-    ld4     { v4.d, v5.d, v6.d, v7.d }[0], [b_pntr]
-    add     b_pntr, b_pntr, #32
-
-    /* dup b ( l,0 ) into all 4 elem. of z0 */
-    /* dup b ( l,1 ) into all 4 elem. of z1 */
-    /* dup b ( l,2 ) into all 4 elem. of z2 */
-    /* dup b ( l,3 ) into all 4 elem. of z3 */
-    dup     z0.d, z0.d[0]
-    dup     z1.d, z1.d[0]
-    dup     z2.d, z2.d[0]
-    dup     z3.d, z3.d[0]
-    /* dup b ( l,4 ) into all 4 elem. of z4 */
-    /* dup b ( l,5 ) into all 4 elem. of z5 */
-    /* dup b ( l,6 ) into all 4 elem. of z6 */
-    /* dup b ( l,7 ) into all 4 elem. of z7 */
-    dup     z4.d, z4.d[0]
-    dup     z5.d, z5.d[0]
-    dup     z6.d, z6.d[0]
-    dup     z7.d, z7.d[0]
+    /* load b ( l,0:1 ) into z0, and duplicate to whole vector */
+    ld1rqd   z0.d, p0/z, [b_pntr]
+    /* load b ( l,2:3 ) into z1, and duplicate to whole vector */
+    ld1rqd   z1.d, p0/z, [b_pntr, #16]
+    /* load b ( l,4:5 ) into z2, and duplicate to whole vector */
+    ld1rqd   z2.d, p0/z, [b_pntr, #32]
+    /* load b ( l,6:7 ) into z3, and duplicate to whole vector */
+    ld1rqd   z3.d, p0/z, [b_pntr, #48]
+    add     b_pntr, b_pntr, #64
 
     /* calculate c */
-    /* c( 0:3,0 ) += a ( 0:3,l ) * b( l,0 )
-     *  VFMLA z16 += z14 * z0
-     */
+    /* c( 0:3,0 ) += a ( 0:3,l ) * b( l,0 ) */
     fmla    z16.d, z14.d, z0.d[0]
-    /* c( 4:7,0 ) += a ( 4:7,l ) * b( l,0 )
-     *  VFMLA z17 += z15 * z0
-     */
+    /* c( 4:7,0 ) += a ( 4:7,l ) * b( l,0 ) */
     fmla    z17.d, z15.d, z0.d[0]
 
     /* c( 0:7,1 ) += a ( 0:7,l ) * b( l,1 ) */
-    fmla    z18.d, z14.d, z1.d[0]
-    fmla    z19.d, z15.d, z1.d[0]
+    fmla    z18.d, z14.d, z0.d[1]
+    fmla    z19.d, z15.d, z0.d[1]
 
     /* c( 0:7,2 ) += a ( 0:7,l ) * b( l,2 ) */
-    fmla    z20.d, z14.d, z2.d[0]
-    fmla    z21.d, z15.d, z2.d[0]
+    fmla    z20.d, z14.d, z1.d[0]
+    fmla    z21.d, z15.d, z1.d[0]
 
     /* c( 0:7,3 ) += a ( 0:7,l ) * b( l,3 ) */
-    fmla    z22.d, z14.d, z3.d[0]
-    fmla    z23.d, z15.d, z3.d[0]
+    fmla    z22.d, z14.d, z1.d[1]
+    fmla    z23.d, z15.d, z1.d[1]
 
     /* c( 0:7,4 ) += a ( 0:7,l ) * b( l,4 ) */
-    fmla    z24.d, z14.d, z4.d[0]
-    fmla    z25.d, z15.d, z4.d[0]
+    fmla    z24.d, z14.d, z2.d[0]
+    fmla    z25.d, z15.d, z2.d[0]
 
     /* c( 0:7,5 ) += a ( 0:7,l ) * b( l,5 ) */
-    fmla    z26.d, z14.d, z5.d[0]
-    fmla    z27.d, z15.d, z5.d[0]
+    fmla    z26.d, z14.d, z2.d[1]
+    fmla    z27.d, z15.d, z2.d[1]
 
     /* c( 0:7,6 ) += a ( 0:7,l ) * b( l,6 ) */
-    fmla    z28.d, z14.d, z6.d[0]
-    fmla    z29.d, z15.d, z6.d[0]
+    fmla    z28.d, z14.d, z3.d[0]
+    fmla    z29.d, z15.d, z3.d[0]
 
     /* c( 0:7,7 ) += a ( 0:7,l ) * b( l,7 ) */
-    fmla    z30.d, z14.d, z7.d[0]
-    fmla    z31.d, z15.d, z7.d[0]
+    fmla    z30.d, z14.d, z3.d[1]
+    fmla    z31.d, z15.d, z3.d[1]
 
     /* decrease offset for next counterL */
     sub    offset, offset, #1
