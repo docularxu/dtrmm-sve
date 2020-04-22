@@ -107,39 +107,39 @@ FUNC:
     SAVE_REGS
 #if 1
 
-    /* copy from c (0:7,0) to z16, z17 */
     ptrue   p0.d, all
+    /* copy from c (0:7,0) to z16, z17 */
     mov     x10, origPC    /* x10 as base pointer of c */
-    ld1d    z16.d, p0/z, [x10]
-    ld1d    z17.d, p0/z, [x10, #1, MUL VL]
+    ldr     z16, [x10]
+    ldr     z17, [x10, #1, MUL VL]
     /* copy from c (0:7,1) to z18, z19 */
     add     x10, x10, LDC, LSL #3   /* x10 points to next col. */
-    ld1d    z18.d, p0/z, [x10]
-    ld1d    z19.d, p0/z, [x10, #1, MUL VL]
+    ldr     z18, [x10]
+    ldr     z19, [x10, #1, MUL VL]
     /* copy from c (0:7,2) to z20, z21 */
     add     x10, x10, LDC, LSL #3   /* x10 points to next col. */
-    ld1d    z20.d, p0/z, [x10]
-    ld1d    z21.d, p0/z, [x10, #1, MUL VL]
+    ldr     z20, [x10]
+    ldr     z21, [x10, #1, MUL VL]
     /* copy from c (0:7,3) to z22, z23 */
     add     x10, x10, LDC, LSL #3   /* x10 points to next col. */
-    ld1d    z22.d, p0/z, [x10]
-    ld1d    z23.d, p0/z, [x10, #1, MUL VL]
+    ldr     z22, [x10]
+    ldr     z23, [x10, #1, MUL VL]
     /* copy from c (0:7,4) to z24, z25 */
     add     x10, x10, LDC, LSL #3   /* x10 points to next col. */
-    ld1d    z24.d, p0/z, [x10]
-    ld1d    z25.d, p0/z, [x10, #1, MUL VL]
+    ldr     z24, [x10]
+    ldr     z25, [x10, #1, MUL VL]
     /* copy from c (0:7,5) to z26, z27 */
     add     x10, x10, LDC, LSL #3   /* x10 points to next col. */
-    ld1d    z26.d, p0/z, [x10]
-    ld1d    z27.d, p0/z, [x10, #1, MUL VL]
+    ldr     z26, [x10]
+    ldr     z27, [x10, #1, MUL VL]
     /* copy from c (0:7,6) to z28, z29 */
     add     x10, x10, LDC, LSL #3   /* x10 points to next col. */
-    ld1d    z28.d, p0/z, [x10]
-    ld1d    z29.d, p0/z, [x10, #1, MUL VL]
+    ldr     z28, [x10]
+    ldr     z29, [x10, #1, MUL VL]
     /* copy from c (0:7,7) to z30, z31 */
     add     x10, x10, LDC, LSL #3   /* x10 points to next col. */
-    ld1d    z30.d, p0/z, [x10]
-    ld1d    z31.d, p0/z, [x10, #1, MUL VL]
+    ldr     z30, [x10]
+    ldr     z31, [x10, #1, MUL VL]
 
 
     /* initialize a_pntr, b_pntr */
@@ -157,11 +157,15 @@ FUNC:
     blt     .Ldtrmm_kernel_loop_END
 
     /* load a ( 0:7, l ) into z14, z15 */
-    ld1d    z14.d, p0/z, [a_pntr]
-    add     a_pntr, a_pntr, #32
-    ld1d    z15.d, p0/z, [a_pntr]
-    add     a_pntr, a_pntr, #32
+    ldr     z14, [a_pntr]
+    ldr     z15, [a_pntr, #1, MUL VL]
+    add     a_pntr, a_pntr, #64
     /* load b ( l,0:3 ) into 1st double of z0, z1, z2, z3 respectively */
+
+/* TODO: for b  matrix, we can */
+/*        use  LD1RQD, FMLA indexed which has no predicate. */
+/* TODO: to replace ld4 and dup, fmla. */
+
     ld4     { v0.d, v1.d, v2.d, v3.d }[0], [b_pntr]
     add     b_pntr, b_pntr, #32
     /* load b ( l,4:7 ) into 1st double of z4, z5, z6 and z7 respectively */
@@ -189,39 +193,39 @@ FUNC:
     /* c( 0:3,0 ) += a ( 0:3,l ) * b( l,0 )
      *  VFMLA z16 += z14 * z0
      */
-    fmla    z16.d, p0/M, z14.d, z0.d
+    fmla    z16.d, z14.d, z0.d[0]
     /* c( 4:7,0 ) += a ( 4:7,l ) * b( l,0 )
      *  VFMLA z17 += z15 * z0
      */
-    fmla    z17.d, p0/M, z15.d, z0.d
+    fmla    z17.d, z15.d, z0.d[0]
 
     /* c( 0:7,1 ) += a ( 0:7,l ) * b( l,1 ) */
-    fmla    z18.d, p0/M, z14.d, z1.d
-    fmla    z19.d, p0/M, z15.d, z1.d
+    fmla    z18.d, z14.d, z1.d[0]
+    fmla    z19.d, z15.d, z1.d[0]
 
     /* c( 0:7,2 ) += a ( 0:7,l ) * b( l,2 ) */
-    fmla    z20.d, p0/M, z14.d, z2.d
-    fmla    z21.d, p0/M, z15.d, z2.d
+    fmla    z20.d, z14.d, z2.d[0]
+    fmla    z21.d, z15.d, z2.d[0]
 
     /* c( 0:7,3 ) += a ( 0:7,l ) * b( l,3 ) */
-    fmla    z22.d, p0/M, z14.d, z3.d
-    fmla    z23.d, p0/M, z15.d, z3.d
+    fmla    z22.d, z14.d, z3.d[0]
+    fmla    z23.d, z15.d, z3.d[0]
 
     /* c( 0:7,4 ) += a ( 0:7,l ) * b( l,4 ) */
-    fmla    z24.d, p0/M, z14.d, z4.d
-    fmla    z25.d, p0/M, z15.d, z4.d
+    fmla    z24.d, z14.d, z4.d[0]
+    fmla    z25.d, z15.d, z4.d[0]
 
     /* c( 0:7,5 ) += a ( 0:7,l ) * b( l,5 ) */
-    fmla    z26.d, p0/M, z14.d, z5.d
-    fmla    z27.d, p0/M, z15.d, z5.d
+    fmla    z26.d, z14.d, z5.d[0]
+    fmla    z27.d, z15.d, z5.d[0]
 
     /* c( 0:7,6 ) += a ( 0:7,l ) * b( l,6 ) */
-    fmla    z28.d, p0/M, z14.d, z6.d
-    fmla    z29.d, p0/M, z15.d, z6.d
+    fmla    z28.d, z14.d, z6.d[0]
+    fmla    z29.d, z15.d, z6.d[0]
 
     /* c( 0:7,7 ) += a ( 0:7,l ) * b( l,7 ) */
-    fmla    z30.d, p0/M, z14.d, z7.d
-    fmla    z31.d, p0/M, z15.d, z7.d
+    fmla    z30.d, z14.d, z7.d[0]
+    fmla    z31.d, z15.d, z7.d[0]
 
     /* decrease offset for next counterL */
     sub    offset, offset, #1
@@ -238,36 +242,36 @@ FUNC:
         *   ptrue   p0.d, all
         */
     mov     x10, origPC    /* x10 as base pointer of c */
-    st1d    z16.d, p0, [x10]
-    st1d    z17.d, p0, [x10, #1, MUL VL]
+    str     z16, [x10]
+    str     z17, [x10, #1, MUL VL]
     /* column c (0:7,1) from z18, z19 */
     add     x10, x10, LDC, LSL #3   /* x10 points to next col. */
-    st1d    z18.d, p0, [x10]
-    st1d    z19.d, p0, [x10, #1, MUL VL]
+    str     z18, [x10]
+    str     z19, [x10, #1, MUL VL]
     /* column c (0:7,2) from z20, z21 */
     add     x10, x10, LDC, LSL #3   /* x10 points to next col. */
-    st1d    z20.d, p0, [x10]
-    st1d    z21.d, p0, [x10, #1, MUL VL]
+    str     z20, [x10]
+    str     z21, [x10, #1, MUL VL]
     /* column c (0:7,3) from z22, z23 */
     add     x10, x10, LDC, LSL #3   /* x10 points to next col. */
-    st1d    z22.d, p0, [x10]
-    st1d    z23.d, p0, [x10, #1, MUL VL]
+    str     z22, [x10]
+    str     z23, [x10, #1, MUL VL]
     /* column c (0:7,4) from z24, z25 */
     add     x10, x10, LDC, LSL #3   /* x10 points to next col. */
-    st1d    z24.d, p0, [x10]
-    st1d    z25.d, p0, [x10, #1, MUL VL]
+    str     z24, [x10]
+    str     z25, [x10, #1, MUL VL]
     /* column c (0:7,5) from z26, z27 */
     add     x10, x10, LDC, LSL #3   /* x10 points to next col. */
-    st1d    z26.d, p0, [x10]
-    st1d    z27.d, p0, [x10, #1, MUL VL]
+    str     z26, [x10]
+    str     z27, [x10, #1, MUL VL]
     /* column c (0:7,6) from z28, z29 */
     add     x10, x10, LDC, LSL #3   /* x10 points to next col. */
-    st1d    z28.d, p0, [x10]
-    st1d    z29.d, p0, [x10, #1, MUL VL]
+    str     z28, [x10]
+    str     z29, [x10, #1, MUL VL]
     /* column c (0:7,7) from z30, z31 */
     add     x10, x10, LDC, LSL #3   /* x10 points to next col. */
-    st1d    z30.d, p0, [x10]
-    st1d    z31.d, p0, [x10, #1, MUL VL]
+    str     z30, [x10]
+    str     z31, [x10, #1, MUL VL]
 
     RESTORE_REGS
 
