@@ -42,8 +42,6 @@
  *
  * */
 
-#include <bl_dtrmm.h>
-
 #ifdef USE_BLAS
 /*
  * dtrmm prototype
@@ -55,7 +53,11 @@ extern void cblas_dtrmm(CBLAS_LAYOUT layout, CBLAS_SIDE Side,
                  CBLAS_DIAG Diag, const int M, const int N,
                  const double alpha, const double *A, const int lda,
                  double *B, const int ldb);
+#undef DGEMM_NR /* the same name is used in cblas.h and bl_dtrmm.h but with different meanings */
+#undef DGEMM_NC /* the same name is used in cblas.h and bl_dtrmm.h but with different meanings */
 #endif
+
+#include <bl_dtrmm.h>
 
 void bl_dtrmm_ref(
         int    m,
